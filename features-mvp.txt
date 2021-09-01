@@ -1,0 +1,14 @@
+Rooms - max no of members 2
+Host a room
+Join a room
+
+Game UI:
+  Players Profile: Player A and Player B along with scores
+  Current Player Turn
+  Live XO board
+  Game Result: Win, Lose or Tie
+  
+Game Interactions:
+  Random first player
+  Update current player turn
+  After game ends: Update the score, Reset the board upon click of reset button
