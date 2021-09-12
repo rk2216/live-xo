@@ -39,7 +39,7 @@ const HomeScreen=()=>{
     const [userName, setUserName]=useState(null);
     const [isHost, setIsHost]=useState(false);
 
-    return !userName ? <UserNameForm {...{setUserName}}/> : func(userName);
+    return !userName ? <UserNameForm {...{setUserName}}/> : <GameList {...{userName}}/>;
         // {window.location.href} === "http://localhost:3000/" ? <GameList {...{userName}}/>;
 };
 export default HomeScreen;

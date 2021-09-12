@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import HomeScreen from "../HomeScreen/HomeScreen";
 import TicTacToe from "../GameScreens/TicTacToe";
+import GameScreenHome from "../GameScreenHome";
 
 
 // This site has 3 pages, all of which are rendered
@@ -35,7 +36,7 @@ export default function Routes() {
                         <HomeScreen />
                     </Route>
                     <Route path="/TIC_TAC_TOE/:roomId"
-                           render={(props) => props.location.state===undefined ? <HomeScreen/> : <TicTacToe {...props}/>}/>
+                           render={(props) => <GameScreenHome {...props} {...{gameName: "TIC_TAC_TOE"}}/>}/>
                 </Switch>
             </div>
         </Router>

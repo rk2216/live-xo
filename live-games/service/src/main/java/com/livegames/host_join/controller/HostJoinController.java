@@ -69,7 +69,7 @@ class HostJoinController {
 //        return User.MessageType.VALID;
 //    }
 
-    @PostMapping("/{gameName}/{key}/validate")
+    @PostMapping("/validate/{gameName}/{key}")
     @ResponseBody
     public String validate(@RequestBody User user, @PathVariable String key, @PathVariable String gameName) {
         if (!roomsMap.containsKey(key)) {
@@ -77,6 +77,12 @@ class HostJoinController {
         }
         if (roomsMap.get(key).getUserList().size() >= 2) {
             return "FULL";
+        }
+        List<User> roomUsers = roomsMap.get(key).getUserList();
+        for(int i=0;i<roomUsers.size();i++){
+            if(roomUsers.get(i).getUserName().equals(user.getUserName())){
+                return "USERNAME ALREADY EXISTS";
+            }
         }
         return "VALID";
     }
@@ -86,15 +92,6 @@ class HostJoinController {
     public User joinGame(@Payload User user, @DestinationVariable String key,
             SimpMessageHeaderAccessor headerAccessor) {
         // Add username in web socket session
-        if (map.getOrDefault(key, new ArrayList<User>()).size() == 0) {
-            user.setContent("Invalid Link");
-            user.setType(User.MessageType.INVALID);
-            return user;
-        }
-        if (map.get(key).size() >= 2) {
-            user.setType(User.MessageType.FULL);
-            return user;
-        }
         List<User> users = map.get(key);
         users.add(user);
         map.put(key, users);
