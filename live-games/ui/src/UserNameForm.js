@@ -25,7 +25,7 @@ const UserNameForm = ({ setUserName, isJoinee, gameName, roomId }) => {
                             .then(response => response.text())
                             .then(data => {
                                 let content = "";
-                                let messageArea = document.querySelector('#messageDisplay');
+                                let messageElement = document.getElementById("messageDisplay");
                                 if (data === "VALID") {
                                     setUserName(value);
                                 } else if (data === "INVALID") {
@@ -35,7 +35,7 @@ const UserNameForm = ({ setUserName, isJoinee, gameName, roomId }) => {
                                 } else {
                                     content = "USERNAME ALREADY EXISTS!";
                                 }
-                                messageArea.appendChild(document.createTextNode(content));
+                                messageElement.innerText=content;
                             });
                     } else {
                         setUserName(value);

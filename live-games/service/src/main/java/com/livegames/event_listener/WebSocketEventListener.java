@@ -1,16 +1,24 @@
 package com.livegames.event_listener;
 
+import com.livegames.configuration.WebApplicationConfig;
+import com.livegames.host_join.controller.HostJoinController;
+import com.livegames.model.Room;
 import com.livegames.model.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class WebSocketEventListener {
@@ -20,6 +28,9 @@ public class WebSocketEventListener {
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
+    @Resource(name = "RoomsMap")
+    Map<String, Room> roomsMap;
+
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         logger.info("Received a new web socket connection");
@@ -28,14 +39,16 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username = (String) headerAccessor.getSessionAttributes().get("username");
-        logger.info("User Disconnected : " + username);
-        if (username != null) {
-            logger.info("User Disconnected : " + username);
+        String userName = (String) headerAccessor.getSessionAttributes().get("userName");
+        String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
+        logger.info("User Disconnected : " + userName);
+        if (userName != null) {
+            logger.info("User Disconnected : " + userName);
 
             User user = new User();
             user.setType(User.MessageType.LEAVE);
-            user.setUserName(username);
+            user.setUserName(userName);
+            roomsMap.get(roomId).getUserMap().remove(userName);
 
             messagingTemplate.convertAndSend("/topic/public", user);
         }

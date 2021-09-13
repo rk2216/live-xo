@@ -3,20 +3,26 @@ package com.livegames.host_join.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.livegames.configuration.WebApplicationConfig;
 import com.livegames.model.CreateRoomRQ;
 import com.livegames.model.Room;
 import com.livegames.model.User;
 import com.livegames.model.User.MessageType;
 
+import com.livegames.validators.ValidatorFactory;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,15 +30,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@Controller
-class HostJoinController {
-    HashMap<String, List<User>> map = new HashMap<>();
-    HashMap<String, Room> roomsMap;
+import javax.annotation.Resource;
 
-    @Autowired
-    public HostJoinController(@Qualifier("RoomsMap") HashMap<String, Room> roomsMap){
-        this.roomsMap=roomsMap;
-    }
+@Data
+@Controller
+public class HostJoinController {
+
+    @Resource(name = "RoomsMap")
+    Map<String, Room> roomsMap;
 
     @PostMapping(value = "/createRoom")
     @ResponseBody
@@ -44,9 +49,9 @@ class HostJoinController {
         Room room = new Room();
         room.setGameType(createRoomRQ.getGameType());
         room.setRoomId(roomId);
-        List<User> users = new ArrayList<>();
-        users.add(createRoomRQ.getUser());
-        room.setUserList(users);
+        HashMap<String, User> userMap = new HashMap<>();
+//        userMap.put(createRoomRQ.getUser().getUserName(), createRoomRQ.getUser());
+        room.setUserMap(userMap);
         roomsMap.put(roomId, room);
         return "/"+room.getGameType()+"/"+roomId;
     }
@@ -57,45 +62,19 @@ class HostJoinController {
         return "index";
     }
 
-//    @PostMapping("/validate/{key}")
-//    @ResponseBody
-//    public MessageType validate(@RequestBody User user, @PathVariable String key) {
-//        if (map.getOrDefault(key, new ArrayList<User>()).size() == 0) {
-//            return User.MessageType.INVALID;
-//        }
-//        if (map.get(key).size() >= 2) {
-//            return User.MessageType.FULL;
-//        }
-//        return User.MessageType.VALID;
-//    }
-
     @PostMapping("/validate/{gameName}/{key}")
     @ResponseBody
     public String validate(@RequestBody User user, @PathVariable String key, @PathVariable String gameName) {
-        if (!roomsMap.containsKey(key)) {
-            return "INVALID";
-        }
-        if (roomsMap.get(key).getUserList().size() >= 2) {
-            return "FULL";
-        }
-        List<User> roomUsers = roomsMap.get(key).getUserList();
-        for(int i=0;i<roomUsers.size();i++){
-            if(roomUsers.get(i).getUserName().equals(user.getUserName())){
-                return "USERNAME ALREADY EXISTS";
-            }
-        }
-        return "VALID";
+        return ValidatorFactory.getValidator(gameName).validate(user, key);
     }
 
-    @MessageMapping("/joingame/{key}")
+    @MessageMapping("/joingame/{roomId}")
     @SendTo("/topic/public")
-    public User joinGame(@Payload User user, @DestinationVariable String key,
+    public User joinGame(@Payload User user, @DestinationVariable String roomId,
             SimpMessageHeaderAccessor headerAccessor) {
-        // Add username in web socket session
-        List<User> users = map.get(key);
-        users.add(user);
-        map.put(key, users);
-        headerAccessor.getSessionAttributes().put("username", user.getUserName());
+        roomsMap.get(roomId).getUserMap().put(user.getUserName(), user);
+        headerAccessor.getSessionAttributes().put("userName", user.getUserName());
+        headerAccessor.getSessionAttributes().put("roomId", roomId);
         return user;
     }
 
