@@ -2,26 +2,35 @@ import React, { useState } from "react";
 import SockJsClient from "react-stomp";
 
 const TicTacToe = (props) => {
+    const [members, setMembers] = useState([]);
+    const [roomHost, setRoomHost] = useState("");
     let clientRef = null;
-    const onConnect = ( userName) => {
-            console.log(clientRef);
-            clientRef.sendMessage("/app/joingame/" + props.match.params.roomId,
-                JSON.stringify({ userName, type: 'JOIN' })
-            )
+    const roomId = props.match.params.roomId;
+    const onConnect = (userName) => {
+        console.log(clientRef);
+        clientRef.sendMessage("/app/joingame/" + roomId,
+            JSON.stringify({ userName, type: 'JOIN' })
+        )
     };
 
-    const onMessageReceived= (payload) => {
-        let message = payload;
+    const onMessageReceived = (payload) => {
+        const host = payload.host;
+        const user = payload.user;
+        const updateMembers = payload.members;
 
         let messageElement = document.getElementById("messageList");
         let li = document.createElement("li");
 
-        if (message.type === 'JOIN') {
+        if (user.type === 'JOIN') {
             messageElement.classList.add('event-message');
-            li.innerText = message.userName + ' joined!';
-        } else if (message.type === 'LEAVE') {
+            li.innerText = user.userName + ' joined!';
+        } else if (user.type === 'LEAVE') {
             messageElement.classList.add('event-message');
-            li.innerText = message.userName + ' left!';
+            li.innerText = user.userName + ' left!';
+        }
+        setMembers(updateMembers);
+        if (roomHost !== host.userName) {
+            setRoomHost(host.userName);
         }
         messageElement.appendChild(li);
     }
@@ -30,21 +39,30 @@ const TicTacToe = (props) => {
 
     return (
         <React.Fragment>
-            <SockJsClient url='http://localhost:8080/ws' topics={['/topic/public']}
-                onMessage={onMessageReceived.bind(this)}
+            <SockJsClient url='http://localhost:8080/ws' topics={['/topic/public/' + roomId]}
+                onMessage={onMessageReceived}
                 ref={(client) => { clientRef = client }}
                 onConnect={() => onConnect(userName)} />
             <div>
                 <h4>User: {userName}</h4>
-                <h6>{isHost ? "Host" : "Joinee"}</h6>
+                <h6>{userName === roomHost ? "Host" : "Joinee"}</h6>
                 <hr />
                 <button
                     onClick={() => { navigator.clipboard.writeText(window.location.href) }}
                 >Copy Link
                 </button>
             </div>
-            <ul id="messageList">
-            </ul>
+            <div style={{ display: 'flex' }}>
+                <ul id="messageList">
+                </ul>
+                <ul>
+                    {members.map((member) => {
+                        return <li>
+                            {member === roomHost ? <b>{member}</b> : member}
+                        </li>
+                    })}
+                </ul>
+            </div>
         </React.Fragment>
     );
 }
