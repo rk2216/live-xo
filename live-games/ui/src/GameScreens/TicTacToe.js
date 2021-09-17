@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import SockJsClient from "react-stomp";
 
 const TicTacToe = (props) => {
@@ -35,7 +35,6 @@ const TicTacToe = (props) => {
         messageElement.appendChild(li);
     }
     const userName = !props.location.state ? props.userName : props.location.state.userName;
-    const isHost = !!props.location.state;
 
     return (
         <React.Fragment>

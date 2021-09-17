@@ -1,5 +1,5 @@
 import TicTacToe from "./GameScreens/TicTacToe";
-import UserNameForm from "./UserNameForm";
+import UserNameForm from "./HomeScreen/UserNameForm";
 import { useState } from "react";
 
 const gameMap = {
