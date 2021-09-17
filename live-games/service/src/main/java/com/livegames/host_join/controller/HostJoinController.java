@@ -1,28 +1,22 @@
 package com.livegames.host_join.controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.livegames.configuration.WebApplicationConfig;
 import com.livegames.model.CreateRoomRQ;
+import com.livegames.model.JoinGameRS;
 import com.livegames.model.Room;
 import com.livegames.model.User;
-import com.livegames.model.User.MessageType;
 
 import com.livegames.validators.ValidatorFactory;
 import lombok.Data;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +33,9 @@ public class HostJoinController {
     @Resource(name = "RoomsMap")
     Map<String, Room> roomsMap;
 
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
+
     @PostMapping(value = "/createRoom")
     @ResponseBody
     public String hostGame(@RequestBody CreateRoomRQ createRoomRQ) {
@@ -50,8 +47,8 @@ public class HostJoinController {
         room.setGameType(createRoomRQ.getGameType());
         room.setRoomId(roomId);
         HashMap<String, User> userMap = new HashMap<>();
-//        userMap.put(createRoomRQ.getUser().getUserName(), createRoomRQ.getUser());
         room.setUserMap(userMap);
+        room.setHost(createRoomRQ.getUser());
         roomsMap.put(roomId, room);
         return "/"+room.getGameType()+"/"+roomId;
     }
@@ -69,13 +66,16 @@ public class HostJoinController {
     }
 
     @MessageMapping("/joingame/{roomId}")
-    @SendTo("/topic/public")
-    public User joinGame(@Payload User user, @DestinationVariable String roomId,
+    public void joinGame(@Payload User user, @DestinationVariable String roomId,
             SimpMessageHeaderAccessor headerAccessor) {
+        JoinGameRS joinGameRS = new JoinGameRS();
+        joinGameRS.setHost(roomsMap.get(roomId).getHost());
+        joinGameRS.setUser(user);
         roomsMap.get(roomId).getUserMap().put(user.getUserName(), user);
+        joinGameRS.setMembers(roomsMap.get(roomId).getUserMap().keySet().toArray(new String[0]));
         headerAccessor.getSessionAttributes().put("userName", user.getUserName());
         headerAccessor.getSessionAttributes().put("roomId", roomId);
-        return user;
+        messagingTemplate.convertAndSend("/topic/public/" + roomId, joinGameRS);
     }
 
     private String generateRoomId() {
