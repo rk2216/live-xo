@@ -4,8 +4,8 @@ import {
     Switch,
     Route
 } from "react-router-dom";
-import HomeScreen from "../HomeScreen/HomeScreen";
-import GameScreenHome from "../GameScreenHome";
+import HomeScreen from "../HomeScreen/HomeScreenContainer";
+import GameScreenHome from "../GameScreenHomeContainer";
 
 export default function Routes() {
     return (

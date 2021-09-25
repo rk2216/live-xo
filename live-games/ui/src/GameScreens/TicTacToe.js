@@ -6,8 +6,8 @@ const TicTacToe = (props) => {
     const [roomHost, setRoomHost] = useState("");
     let clientRef = null;
     const roomId = props.match.params.roomId;
+    const userName = props.userName;
     const onConnect = (userName) => {
-        console.log(clientRef);
         clientRef.sendMessage("/app/joingame/" + roomId,
             JSON.stringify({ userName, type: 'JOIN' })
         )
@@ -34,7 +34,6 @@ const TicTacToe = (props) => {
         }
         messageElement.appendChild(li);
     }
-    const userName = !props.location.state ? props.userName : props.location.state.userName;
 
     return (
         <React.Fragment>

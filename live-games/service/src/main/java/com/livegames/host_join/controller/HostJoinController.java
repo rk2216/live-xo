@@ -33,8 +33,12 @@ public class HostJoinController {
     @Resource(name = "RoomsMap")
     Map<String, Room> roomsMap;
 
+    private final SimpMessageSendingOperations messagingTemplate;
+
     @Autowired
-    private SimpMessageSendingOperations messagingTemplate;
+    public HostJoinController(SimpMessageSendingOperations messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @PostMapping(value = "/createRoom")
     @ResponseBody

@@ -1,15 +1,14 @@
 import TicTacToe from "./GameScreens/TicTacToe";
 import UserNameForm from "./HomeScreen/UserNameForm";
-import { useState } from "react";
 
 const gameMap = {
     TIC_TAC_TOE: TicTacToe
 };
 
 const GameScreenHome = (props) => {
-    const [userName, setUserName] = useState("");
+    const {userName, actions: {setUserName}} = props;
     const GameComponent = gameMap[props.gameName] || null;
-    return props.location.state || userName ?
+    return userName ?
         <GameComponent {...props} {...{ userName }} /> :
         <UserNameForm {...{
             setUserName, isJoinee: true,

@@ -48,6 +48,7 @@ public class WebSocketEventListener {
             user.setUserName(userName);
             currentRoom.getUserMap().remove(userName);
             if(currentRoom.getUserMap().isEmpty()){
+                roomsMap.remove(roomId);
                 return;
             }
             User previousHost = currentRoom.getHost();

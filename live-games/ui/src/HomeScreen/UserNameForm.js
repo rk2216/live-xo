@@ -10,11 +10,10 @@ const UserNameForm = ({setUserName, isJoinee, gameName, roomId}) => {
                 <TextField id="username" label="Username" variant="outlined" required onChange={(e) => {
                     setValue(e.target.value);
                 }} value={value}/>
-                {/*<input type="text" id="name" placeholder="Username" autoComplete="off" className="form-control" value={value}*/}
             </div>
             <div className="form-group">
                 <Button
-                    type="submit"
+                    type="button"
                     className="accent username-submit"
                     onClick={(e) => {
                         if (isJoinee) {

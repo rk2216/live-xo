@@ -105,6 +105,9 @@ code {
     ul {
       margin-left: 2rem;
       li {
+        &::marker {
+          color: #fff;
+        }
         margin: 1rem 0;
       }
     }

@@ -103,6 +103,5 @@ dist
 # TernJS port file
 .tern-port
 .vscode/
-/.idea/
-/live-xo.iml
-/live-games/ui/ui.iml
+.idea/
+**.iml
