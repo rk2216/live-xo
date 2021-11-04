@@ -1,4 +1,4 @@
-import {useState} from "react";
+import React, {useState} from "react";
 import {Redirect} from "react-router";
 import {Button} from "@mui/material";
 
@@ -62,11 +62,7 @@ const GameList = ({userName}) => {
         </div>
     </div> : <Redirect
         to={{
-            pathname: gameLink,
-            state: {
-                userName,
-                gameLink
-            }
+            pathname: gameLink
         }}/>;
 };
 

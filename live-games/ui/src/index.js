@@ -1,15 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './HomeScreen/index.scss';
 import reportWebVitals from './reportWebVitals';
 import Routes from "./routes/Routes";
-import {Provider} from "react-redux";
-import {store} from "./ReduxStore/CreateStore";
+import { Provider } from "react-redux";
+import { store } from "./ReduxStore/CreateStore";
+import "./importStyles";
 
 ReactDOM.render(
     <Provider store={store}>
         <React.StrictMode>
-            <Routes/>
+            <Routes />
         </React.StrictMode>
     </Provider>,
     document.getElementById('root')

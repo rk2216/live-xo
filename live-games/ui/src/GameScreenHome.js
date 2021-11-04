@@ -1,3 +1,4 @@
+import React from 'react';
 import TicTacToe from "./GameScreens/TicTacToe";
 import UserNameForm from "./HomeScreen/UserNameForm";
 
@@ -6,7 +7,7 @@ const gameMap = {
 };
 
 const GameScreenHome = (props) => {
-    const {userName, actions: {setUserName}} = props;
+    const { userName, actions: { setUserName } } = props;
     const GameComponent = gameMap[props.gameName] || null;
     return userName ?
         <GameComponent {...props} {...{ userName }} /> :
