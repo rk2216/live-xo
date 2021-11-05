@@ -50,9 +50,10 @@ const TicTacToe = (props) => {
                 >Copy Link
                 </button>
             </div>
-            <div style={{ display: 'flex' }}>
+            <div className="userGameDisplay">
                 <ul id="messageList">
                 </ul>
+                <div/>
                 <ul>
                     {members.map((member, index) => {
                         return <li key={`${member}.${index}`}>
@@ -60,7 +61,7 @@ const TicTacToe = (props) => {
                         </li>
                     })}
                 </ul>
-            </div>  
+            </div>
         </div>
     );
 }

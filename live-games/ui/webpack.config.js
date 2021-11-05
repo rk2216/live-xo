@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const port = process.env.PORT || 3000;
@@ -8,6 +9,11 @@ module.exports = {
     output: {
         filename: 'bundle.[hash].js',
         publicPath: '/',
+    },
+    resolve: {
+        alias: {
+            "react-dom": "@hot-loader/react-dom",
+        },
     },
     devtool: 'inline-source-map',
     module: {
@@ -45,6 +51,7 @@ module.exports = {
         ]
     },
     plugins: [
+        new webpack.HotModuleReplacementPlugin(),
         new HtmlWebpackPlugin({
             template: './public/index.html',
             favicon: './public/favicon.ico',

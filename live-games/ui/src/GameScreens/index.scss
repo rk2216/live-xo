@@ -1,4 +1,7 @@
 #gameRoot {
   color: yellow;
   background: black;
+  .userGameDisplay {
+    display: flex;
+  }
 }
