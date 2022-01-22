@@ -3,6 +3,7 @@ import UserNameForm from "./UserNameForm";
 import GameList from "./GameList";
 
 const HomeScreen = (props) => {
+    // const board = [];
     const { userName, actions: { setUserName } } = props;
 
     return !userName ? <UserNameForm {...{ setUserName }} /> : <GameList {...{ userName }} />;

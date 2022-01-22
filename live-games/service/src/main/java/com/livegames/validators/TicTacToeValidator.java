@@ -14,7 +14,7 @@ public class TicTacToeValidator extends Validator{
     @Resource(name = "RoomsMap")
     Map<String, Room> roomsMap;
 
-    private final int MAX_PLAYERS_COUNT=4;
+    private final int MAX_PLAYERS_COUNT=2;
 
     @Override
     public String validate(User user, String roomId) {

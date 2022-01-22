@@ -1,69 +1,68 @@
-import React, { useState } from "react";
-import SockJsClient from "react-stomp";
+import classNames from 'classnames';
+import React from "react";
+
+const NO_OP = () => { }
+export const updateTicTacToe = (payload, action) => {
+    const {
+        board,
+        players,
+        currentTurn
+    } = payload;
+    action({ board, players, currentTurn, gameName: 'TIC_TAC_TOE' });
+};
 
 const TicTacToe = (props) => {
-    const [members, setMembers] = useState([]);
-    const [roomHost, setRoomHost] = useState("");
-    let clientRef = null;
-    const roomId = props.match.params.roomId;
-    const userName = props.userName;
-    const onConnect = (userName) => {
-        clientRef.sendMessage("/app/joingame/" + roomId,
-            JSON.stringify({ userName, type: 'JOIN' })
+    const {
+        gameState: tiles,
+        currentTurn,
+        clientRef,
+        roomId,
+        playerPosition,
+        roomHost,
+        userName
+    } = props;
+
+    const onClickHandler = (index) => {
+        clientRef.sendMessage("/app/ticTacToe/" + roomId,
+            JSON.stringify({ index, currentTurn })
         )
-    };
-
-    const onMessageReceived = (payload) => {
-        const host = payload.host;
-        const user = payload.user;
-        const updateMembers = payload.members;
-
-        let messageElement = document.getElementById("messageList");
-        let li = document.createElement("li");
-
-        if (user.type === 'JOIN') {
-            messageElement.classList.add('event-message');
-            li.innerText = user.userName + ' joined!';
-        } else if (user.type === 'LEAVE') {
-            messageElement.classList.add('event-message');
-            li.innerText = user.userName + ' left!';
-        }
-        setMembers(updateMembers);
-        if (roomHost !== host.userName) {
-            setRoomHost(host.userName);
-        }
-        messageElement.appendChild(li);
     }
 
-    return (
-        <div id="gameRoot">
-            <SockJsClient url='http://localhost:8080/ws' topics={['/topic/public/' + roomId]}
-                onMessage={onMessageReceived}
-                ref={(client) => { clientRef = client }}
-                onConnect={() => onConnect(userName)} />
-            <div>
-                <h4>User: {userName}</h4>
-                <h6>{userName === roomHost ? "Host" : "Joinee"}</h6>
-                <hr />
-                <button
-                    onClick={() => { navigator.clipboard.writeText(window.location.href) }}
-                >Copy Link
-                </button>
-            </div>
-            <div className="userGameDisplay">
-                <ul id="messageList">
-                </ul>
-                <div/>
-                <ul>
-                    {members.map((member, index) => {
-                        return <li key={`${member}.${index}`}>
-                            {member === roomHost ? <b>{member}</b> : member}
-                        </li>
-                    })}
-                </ul>
-            </div>
-        </div>
-    );
-}
+    const onResetHandler = () => {
+        clientRef.sendMessage("/app/ticTacToe/reset/" + roomId);
+    };
+
+    return <main className="background">
+        <section className="title">
+            <h1>Tic Tac Toe</h1>
+        </section>
+        <section className="display">
+            You are <span className={classNames("display-player", {
+                playerX: playerPosition === 'X',
+                playerO: playerPosition === 'O'
+            })}>{playerPosition}</span>
+        </section>
+        <section className="display">
+            Player <span className={classNames("display-player", {
+                playerX: currentTurn === 'X',
+                playerO: currentTurn === 'O'
+            })}>{currentTurn}</span>'s turn
+        </section>
+        <section className="container">
+            {tiles.map((tile, index) => {
+                return <div className={classNames('tile', {
+                    'xTile': tile === 'X',
+                    'oTile': tile === 'O',
+                    'empty': tile === null
+                })} onClick={() => (!tile && playerPosition === currentTurn) ? onClickHandler(index) : NO_OP()}>{tile}</div>;
+            }
+            )}
+        </section>
+        <section className="display announcer hide"></section>
+        {userName === roomHost && <section className="controls">
+            <button id="reset" onClick={onResetHandler}>Reset</button>
+        </section>}
+    </main>
+};
 
 export default TicTacToe;
