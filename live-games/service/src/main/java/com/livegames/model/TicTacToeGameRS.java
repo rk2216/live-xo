@@ -10,4 +10,5 @@ public class TicTacToeGameRS {
     List<Character> board;
     Map<String, Character> players;
     Character currentTurn;
+    Character winner;
 }

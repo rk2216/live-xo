@@ -6,9 +6,10 @@ export const updateTicTacToe = (payload, action) => {
     const {
         board,
         players,
-        currentTurn
+        currentTurn,
+        winner
     } = payload;
-    action({ board, players, currentTurn, gameName: 'TIC_TAC_TOE' });
+    action({ board, players, currentTurn, winner, gameName: 'TIC_TAC_TOE' });
 };
 
 const TicTacToe = (props) => {
@@ -19,7 +20,8 @@ const TicTacToe = (props) => {
         roomId,
         playerPosition,
         roomHost,
-        userName
+        userName,
+        winner
     } = props;
 
     const onClickHandler = (index) => {
@@ -54,11 +56,12 @@ const TicTacToe = (props) => {
                     'xTile': tile === 'X',
                     'oTile': tile === 'O',
                     'empty': tile === null
-                })} onClick={() => (!tile && playerPosition === currentTurn) ? onClickHandler(index) : NO_OP()}>{tile}</div>;
+                })} onClick={() => (!tile && playerPosition === currentTurn && !winner) ?
+                    onClickHandler(index) : NO_OP()}>{tile}</div>;
             }
             )}
         </section>
-        <section className="display announcer hide"></section>
+        {winner && <section className="display announcer">Winner is {winner}</section>}
         {userName === roomHost && <section className="controls">
             <button id="reset" onClick={onResetHandler}>Reset</button>
         </section>}

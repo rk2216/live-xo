@@ -3,6 +3,7 @@ package com.livegames.host_join.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.livegames.model.TicTacToeGameRQ;
@@ -37,6 +38,7 @@ public class TicTacToeGameController {
         TicTacToeGameRS ticTacToeGameRS = gameMap.get(roomId);
         ticTacToeGameRS.getBoard().set(ticTacToeGameRQ.getIndex(), ticTacToeGameRQ.getCurrentTurn());
         ticTacToeGameRS.setCurrentTurn(ticTacToeGameRS.getCurrentTurn().equals('X') ? 'O' : 'X');
+        ticTacToeGameRS.setWinner(findWinner(ticTacToeGameRS.getBoard()));
         messagingTemplate.convertAndSend("/topic/public/" + roomId, ticTacToeGameRS);
     }
 
@@ -45,6 +47,7 @@ public class TicTacToeGameController {
         TicTacToeGameRS ticTacToeGameRS = gameMap.get(roomId);
         ticTacToeGameRS.setBoard(new ArrayList<>(Collections.nCopies(9, null)));
         ticTacToeGameRS.setCurrentTurn('X');
+        ticTacToeGameRS.setWinner(null);
         messagingTemplate.convertAndSend("/topic/public/" + roomId, ticTacToeGameRS);
     }
 
@@ -65,8 +68,77 @@ public class TicTacToeGameController {
             ticTacToeGameRS.setBoard(new ArrayList<>(Collections.nCopies(9, null)));
             ticTacToeGameRS.setPlayers(players);
             ticTacToeGameRS.setCurrentTurn('X');
+            ticTacToeGameRS.setWinner(null);
             gameMap.put(roomId, ticTacToeGameRS);
         }
         messagingTemplate.convertAndSend("/topic/public/" + roomId, ticTacToeGameRS);
+    }
+
+    Character findWinner(List<Character> board) {
+        //Column winner
+        if((board.get(0) != null && board.get(0).equals('X') 
+        && board.get(3) != null && board.get(3).equals('X') 
+        && board.get(6) != null && board.get(6).equals('X')) || 
+        (board.get(1) != null && board.get(1).equals('X') 
+        && board.get(4) != null && board.get(4).equals('X') 
+        && board.get(7) != null && board.get(7).equals('X')) || 
+        (board.get(2) != null && board.get(2).equals('X') 
+        && board.get(5) != null && board.get(5).equals('X') 
+        && board.get(8) != null && board.get(8).equals('X'))) {
+            return 'X';
+        }
+        if((board.get(0) != null && board.get(0).equals('O') 
+        && board.get(3) != null && board.get(3).equals('O') 
+        && board.get(6) != null && board.get(6).equals('O')) || 
+        (board.get(1) != null && board.get(1).equals('O') 
+        && board.get(4) != null && board.get(4).equals('O') 
+        && board.get(7) != null && board.get(7).equals('O')) || 
+        (board.get(2) != null && board.get(2).equals('O') 
+        && board.get(5) != null && board.get(5).equals('O') 
+        && board.get(8) != null && board.get(8).equals('O'))) {
+            return 'O';
+        }
+        //Row winner
+        if((board.get(0) != null && board.get(0).equals('X') 
+        && board.get(1) != null && board.get(1).equals('X') 
+        && board.get(2) != null && board.get(2).equals('X')) || 
+        (board.get(3) != null && board.get(3).equals('X') 
+        && board.get(4) != null && board.get(4).equals('X') 
+        && board.get(5) != null && board.get(5).equals('X')) || 
+        (board.get(6) != null && board.get(6).equals('X') 
+        && board.get(7) != null && board.get(7).equals('X') 
+        && board.get(8) != null && board.get(8).equals('X'))) {
+            return 'X';
+        }
+        if((board.get(0) != null && board.get(0).equals('O') 
+        && board.get(1) != null && board.get(1).equals('O') 
+        && board.get(2) != null && board.get(2).equals('O')) || 
+        (board.get(3) != null && board.get(3).equals('O') 
+        && board.get(4) != null && board.get(4).equals('O') 
+        && board.get(5) != null && board.get(5).equals('O')) || 
+        (board.get(6) != null && board.get(6).equals('O') 
+        && board.get(7) != null && board.get(7).equals('O') 
+        && board.get(8) != null && board.get(8).equals('O'))) {
+            return 'O';
+        }
+        //Diagonal Winner
+        if((board.get(0) != null && board.get(0).equals('X') 
+        && board.get(4) != null && board.get(4).equals('X') 
+        && board.get(8) != null && board.get(8).equals('X')) || 
+        (board.get(2) != null && board.get(2).equals('X') 
+        && board.get(4) != null && board.get(4).equals('X') 
+        && board.get(6) != null && board.get(6).equals('X'))) {
+            return 'X';
+        }
+        if((board.get(0) != null && board.get(0).equals('O') 
+        && board.get(4) != null && board.get(4).equals('O') 
+        && board.get(8) != null && board.get(8).equals('O')) || 
+        (board.get(2) != null && board.get(2).equals('O') 
+        && board.get(4) != null && board.get(4).equals('O') 
+        && board.get(6) != null && board.get(6).equals('O'))) {
+            return 'O';
+        }
+
+        return null;
     }
 }

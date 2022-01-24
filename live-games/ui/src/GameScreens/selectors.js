@@ -1,4 +1,4 @@
-import { CURRENT_TURN, GAME_STATE, PLAYERS, USERNAME } from '../ReduxStore/Constants';
+import { CURRENT_TURN, GAME_STATE, PLAYERS, USERNAME, WINNER } from '../ReduxStore/Constants';
 import { ROOT, TIC_TAC_TOE } from '../ReduxStore/CreateStore';
 
 export const getGameState = state => state.getIn([TIC_TAC_TOE, GAME_STATE]) || ['', '', '', '', '', '', '', '', ''];
@@ -8,3 +8,4 @@ export const getPlayerPosition = state => {
     const players = state.getIn([TIC_TAC_TOE, PLAYERS]) || {};
     return players[userName] || '';
 };
+export const getWinner = state => state.getIn([TIC_TAC_TOE, WINNER]) || '';
