@@ -2,15 +2,6 @@ import classNames from 'classnames';
 import React from "react";
 
 const NO_OP = () => { }
-export const updateTicTacToe = (payload, action) => {
-    const {
-        board,
-        players,
-        currentTurn,
-        winner
-    } = payload;
-    action({ board, players, currentTurn, winner, gameName: 'TIC_TAC_TOE' });
-};
 
 const TicTacToe = (props) => {
     const {
@@ -63,9 +54,20 @@ const TicTacToe = (props) => {
         </section>
         {winner && <section className="display announcer">Winner is {winner}</section>}
         {userName === roomHost && <section className="controls">
-            <button id="reset" onClick={onResetHandler}>Reset</button>
+            <button id="reset" onClick={onResetHandler} hidden={true}>Reset</button>
         </section>}
     </main>
+};
+
+export const updateTicTacToe = (payload, action) => {
+    const {
+        board,
+        players,
+        currentTurn,
+        winner
+    } = payload;
+    if( document.getElementById("reset") ) document.getElementById("reset").hidden = (winner == null) ;
+    action({ board, players, currentTurn, winner, gameName: 'TIC_TAC_TOE' });
 };
 
 export default TicTacToe;
