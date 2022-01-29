@@ -24,6 +24,7 @@ import lombok.Data;
 @Controller
 public class TicTacToeGameController {
     private final SimpMessageSendingOperations messagingTemplate;
+    private Character X = 'X', O = 'O', TIE = 'T';
 
     Map<String, TicTacToeGameRS> gameMap = new HashMap<>();
 
@@ -34,10 +35,10 @@ public class TicTacToeGameController {
 
     @MessageMapping("/ticTacToe/{roomId}")
     public void updateBoard(@Payload TicTacToeGameRQ ticTacToeGameRQ, @DestinationVariable String roomId,
-            SimpMessageHeaderAccessor headerAccessor) {
+                            SimpMessageHeaderAccessor headerAccessor) {
         TicTacToeGameRS ticTacToeGameRS = gameMap.get(roomId);
         ticTacToeGameRS.getBoard().set(ticTacToeGameRQ.getIndex(), ticTacToeGameRQ.getCurrentTurn());
-        ticTacToeGameRS.setCurrentTurn(ticTacToeGameRS.getCurrentTurn().equals('X') ? 'O' : 'X');
+        ticTacToeGameRS.setCurrentTurn(ticTacToeGameRS.getCurrentTurn().equals(X) ? O : X);
         ticTacToeGameRS.setWinner(findWinner(ticTacToeGameRS.getBoard()));
         messagingTemplate.convertAndSend("/topic/public/" + roomId, ticTacToeGameRS);
     }
@@ -46,28 +47,28 @@ public class TicTacToeGameController {
     public void resetBoard(@DestinationVariable String roomId, SimpMessageHeaderAccessor headerAccessor) {
         TicTacToeGameRS ticTacToeGameRS = gameMap.get(roomId);
         ticTacToeGameRS.setBoard(new ArrayList<>(Collections.nCopies(9, null)));
-        ticTacToeGameRS.setCurrentTurn('X');
+        ticTacToeGameRS.setCurrentTurn(X);
         ticTacToeGameRS.setWinner(null);
         messagingTemplate.convertAndSend("/topic/public/" + roomId, ticTacToeGameRS);
     }
 
     @MessageMapping("/ticTacToe/create/{roomId}")
     public void createBoard(@Payload User user, @DestinationVariable String roomId,
-            SimpMessageHeaderAccessor headerAccessor) {
+                            SimpMessageHeaderAccessor headerAccessor) {
         TicTacToeGameRS ticTacToeGameRS;
         if (gameMap.containsKey(roomId)) {
             ticTacToeGameRS = gameMap.get(roomId);
             Map<String, Character> players = ticTacToeGameRS.getPlayers();
-            players.put(user.getUserName(), players.entrySet().iterator().next().getValue().equals('X') ? 'O' : 'X');
+            players.put(user.getUserName(), players.entrySet().iterator().next().getValue().equals(X) ? O : X);
             ticTacToeGameRS.setPlayers(players);
             gameMap.put(roomId, ticTacToeGameRS);
         } else {
             ticTacToeGameRS = new TicTacToeGameRS();
             Map<String, Character> players = new HashMap<>();
-            players.put(user.getUserName(), 'X');
+            players.put(user.getUserName(), X);
             ticTacToeGameRS.setBoard(new ArrayList<>(Collections.nCopies(9, null)));
             ticTacToeGameRS.setPlayers(players);
-            ticTacToeGameRS.setCurrentTurn('X');
+            ticTacToeGameRS.setCurrentTurn(X);
             ticTacToeGameRS.setWinner(null);
             gameMap.put(roomId, ticTacToeGameRS);
         }
@@ -75,70 +76,44 @@ public class TicTacToeGameController {
     }
 
     Character findWinner(List<Character> board) {
-        //Column winner
-        if((board.get(0) != null && board.get(0).equals('X') 
-        && board.get(3) != null && board.get(3).equals('X') 
-        && board.get(6) != null && board.get(6).equals('X')) || 
-        (board.get(1) != null && board.get(1).equals('X') 
-        && board.get(4) != null && board.get(4).equals('X') 
-        && board.get(7) != null && board.get(7).equals('X')) || 
-        (board.get(2) != null && board.get(2).equals('X') 
-        && board.get(5) != null && board.get(5).equals('X') 
-        && board.get(8) != null && board.get(8).equals('X'))) {
-            return 'X';
+        //Column Winner
+        for (int col = 0; col <= 2; col++) {
+            if (board.get(col) != null && board.get(col + 3) != null && board.get(col + 6) != null) {
+                if (board.get(col) == board.get(col + 3) && board.get(col + 3) == board.get(col + 6)) {
+                    return board.get(col);
+                }
+            }
         }
-        if((board.get(0) != null && board.get(0).equals('O') 
-        && board.get(3) != null && board.get(3).equals('O') 
-        && board.get(6) != null && board.get(6).equals('O')) || 
-        (board.get(1) != null && board.get(1).equals('O') 
-        && board.get(4) != null && board.get(4).equals('O') 
-        && board.get(7) != null && board.get(7).equals('O')) || 
-        (board.get(2) != null && board.get(2).equals('O') 
-        && board.get(5) != null && board.get(5).equals('O') 
-        && board.get(8) != null && board.get(8).equals('O'))) {
-            return 'O';
-        }
-        //Row winner
-        if((board.get(0) != null && board.get(0).equals('X') 
-        && board.get(1) != null && board.get(1).equals('X') 
-        && board.get(2) != null && board.get(2).equals('X')) || 
-        (board.get(3) != null && board.get(3).equals('X') 
-        && board.get(4) != null && board.get(4).equals('X') 
-        && board.get(5) != null && board.get(5).equals('X')) || 
-        (board.get(6) != null && board.get(6).equals('X') 
-        && board.get(7) != null && board.get(7).equals('X') 
-        && board.get(8) != null && board.get(8).equals('X'))) {
-            return 'X';
-        }
-        if((board.get(0) != null && board.get(0).equals('O') 
-        && board.get(1) != null && board.get(1).equals('O') 
-        && board.get(2) != null && board.get(2).equals('O')) || 
-        (board.get(3) != null && board.get(3).equals('O') 
-        && board.get(4) != null && board.get(4).equals('O') 
-        && board.get(5) != null && board.get(5).equals('O')) || 
-        (board.get(6) != null && board.get(6).equals('O') 
-        && board.get(7) != null && board.get(7).equals('O') 
-        && board.get(8) != null && board.get(8).equals('O'))) {
-            return 'O';
+        //Row Winner
+        for (int row = 0; row <= 6; row += 3) {
+            if (board.get(row) != null && board.get(row + 1) != null && board.get(row + 2) != null) {
+                if (board.get(row) == board.get(row + 1) && board.get(row + 1) == board.get(row + 2)) {
+                    return board.get(row);
+                }
+            }
         }
         //Diagonal Winner
-        if((board.get(0) != null && board.get(0).equals('X') 
-        && board.get(4) != null && board.get(4).equals('X') 
-        && board.get(8) != null && board.get(8).equals('X')) || 
-        (board.get(2) != null && board.get(2).equals('X') 
-        && board.get(4) != null && board.get(4).equals('X') 
-        && board.get(6) != null && board.get(6).equals('X'))) {
-            return 'X';
+        if (board.get(0) != null && board.get(4) != null && board.get(8) != null) {
+            if (board.get(0) == board.get(4) && board.get(4) == board.get(8)) {
+                return board.get(4);
+            }
         }
-        if((board.get(0) != null && board.get(0).equals('O') 
-        && board.get(4) != null && board.get(4).equals('O') 
-        && board.get(8) != null && board.get(8).equals('O')) || 
-        (board.get(2) != null && board.get(2).equals('O') 
-        && board.get(4) != null && board.get(4).equals('O') 
-        && board.get(6) != null && board.get(6).equals('O'))) {
-            return 'O';
+        if (board.get(2) != null && board.get(4) != null && board.get(6) != null) {
+            if (board.get(2) == board.get(4) && board.get(4) == board.get(6)) {
+                return board.get(4);
+            }
         }
-
+        //Tie Condition
+        boolean isBoardFull = true;
+        for (int i = 0; i < 9; i++) {
+            if (board.get(i) == null) {
+                isBoardFull = false;
+                break;
+            }
+        }
+        if (isBoardFull) {
+            return TIE;
+        }
         return null;
     }
 }
