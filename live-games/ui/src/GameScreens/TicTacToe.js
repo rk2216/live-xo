@@ -65,7 +65,6 @@ const TicTacToe = (props) => {
         <section
             className="display announcer">{(winner === "T") ? "Draw!" :
             ((winner === "X" || winner === "O") ? ("Winner is " + winner) : "")}</section>
-        }
         {userName === roomHost && <section className="controls">
             <button id="reset" onClick={onResetHandler} hidden={isResetButtonHidden}>Reset</button>
         </section>}
