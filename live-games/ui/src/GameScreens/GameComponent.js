@@ -7,15 +7,20 @@ import ListItemText from '@mui/material/ListItemText';
 import { FixedSizeList } from 'react-window';
 import TicTacToe from "./TicTacToeContainer";
 import { updateTicTacToe } from "./TicTacToe";
+import { computeRank } from "./helpers";
 
-const renderRow = (members) => (props) => {
+const renderRow = (members, scores, ranks) => (props) => {
     const { index, style } = props;
 
     return (
         <ListItem style={style} key={index} component="div" disablePadding>
-            <ListItemButton>
-                <ListItemText primary={members[index]} />
-            </ListItemButton>
+            <div className="listItem">
+                <div className="rank">#{ranks[index]}</div>
+                <div className="info">
+                    <div className="playerName">{members[index]}</div>
+                    <div className="score">Score: {scores[members[index]] ? scores[members[index]].score : 0}</div>
+                </div>
+            </div>
         </ListItem>
     );
 }
@@ -44,6 +49,7 @@ const gameUpdateActionMap = {
 
 const GameComponent = (props) => {
     const [members, setMembers] = useState([]);
+    const [scores, setScores] = useState({});
     const [roomHost, setRoomHost] = useState("");
     const [chatConsole, setChatConsole] = useState([]);
     const [clientRef, setClientRef] = useState(null);
@@ -59,6 +65,9 @@ const GameComponent = (props) => {
             updateGame
         }
     } = props;
+
+    const ranks = computeRank(scores, members);
+    
     const onConnect = (userName) => {
         clientRef.sendMessage("/app/joingame/" + roomId,
             JSON.stringify({ userName, type: 'JOIN' })
@@ -67,7 +76,7 @@ const GameComponent = (props) => {
             JSON.stringify({ userName, type: 'JOIN' })
         )
     };
-    
+
     const Game = gameMap[gameName] || null;
 
     const userChatUpdate = (payload) => {
@@ -94,9 +103,10 @@ const GameComponent = (props) => {
         }
     }
     const onMessageReceived = (payload) => {
-        if(payload.responseType === 'ROOM') {
+        if (payload.responseType === 'ROOM') {
             userChatUpdate(payload);
         } else {
+            setScores(payload.userMap || {});
             gameUpdateActionMap[gameName](payload, updateGame);
         }
     }
@@ -118,19 +128,19 @@ const GameComponent = (props) => {
             </div>
             <div className="userGameDisplay">
                 <Box
-                    sx={{ width: '100%', height: 400, maxWidth: 360, bgcolor: 'background.paper' }}
+                    sx={{ width: '100%', height: 400, maxWidth: 240, bgcolor: 'background.paper' }}
                 >
                     <FixedSizeList
                         height={400}
-                        width={360}
-                        itemSize={46}
+                        width={240}
+                        itemSize={92}
                         itemCount={members.length}
                         overscanCount={5}
                     >
-                        {renderRow(members, roomHost)}
+                        {renderRow(members, scores, ranks, roomHost)}
                     </FixedSizeList>
                 </Box>
-                <Game {...{clientRef, roomId, roomHost, userName}}/>
+                <Game {...{ clientRef, roomId, roomHost, userName }} />
                 <Box
                     sx={{ width: '100%', height: 400, maxWidth: 360, bgcolor: 'background.paper' }}
                 >

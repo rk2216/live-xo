@@ -7,7 +7,7 @@ public class User {
     private MessageType type;
     private String content;
     private String userName;
-    private Integer Score;
+    private Integer score = 0;
 
     public enum MessageType {
         JOIN,

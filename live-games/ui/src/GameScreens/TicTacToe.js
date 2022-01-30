@@ -52,7 +52,7 @@ const TicTacToe = (props) => {
         </section>
         <section className="container">
             {tiles.map((tile, index) => {
-                return <div className={classNames('tile', {
+                return <div key={`tile${index}`} className={classNames('tile', {
                     'xTile': tile === 'X',
                     'oTile': tile === 'O',
                     'empty': tile === null

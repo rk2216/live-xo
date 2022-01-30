@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
+import com.livegames.model.Room;
 import com.livegames.model.TicTacToeGameRQ;
 import com.livegames.model.TicTacToeGameRS;
 import com.livegames.model.User;
@@ -25,6 +28,9 @@ import lombok.Data;
 public class TicTacToeGameController {
     private final SimpMessageSendingOperations messagingTemplate;
 
+    @Resource(name = "RoomsMap")
+    Map<String, Room> roomsMap;
+
     Map<String, TicTacToeGameRS> gameMap = new HashMap<>();
 
     @Autowired
@@ -38,7 +44,16 @@ public class TicTacToeGameController {
         TicTacToeGameRS ticTacToeGameRS = gameMap.get(roomId);
         ticTacToeGameRS.getBoard().set(ticTacToeGameRQ.getIndex(), ticTacToeGameRQ.getCurrentTurn());
         ticTacToeGameRS.setCurrentTurn(ticTacToeGameRS.getCurrentTurn().equals('X') ? 'O' : 'X');
-        ticTacToeGameRS.setWinner(findWinner(ticTacToeGameRS.getBoard()));
+        Character winner = findWinner(ticTacToeGameRS.getBoard());
+        for (Map.Entry<String, Character> entry : ticTacToeGameRS.getPlayers().entrySet()) {
+            if (entry.getValue().equals(winner)) {
+                Room room = roomsMap.get(roomId);
+                User user = room.getUserMap().get(entry.getKey());
+                user.setScore(user.getScore()+1);
+                ticTacToeGameRS.setUserMap(room.getUserMap());
+            }
+        }
+        ticTacToeGameRS.setWinner(winner);
         messagingTemplate.convertAndSend("/topic/public/" + roomId, ticTacToeGameRS);
     }
 
@@ -69,6 +84,7 @@ public class TicTacToeGameController {
             ticTacToeGameRS.setPlayers(players);
             ticTacToeGameRS.setCurrentTurn('X');
             ticTacToeGameRS.setWinner(null);
+            ticTacToeGameRS.setUserMap(roomsMap.get(roomId).getUserMap());
             gameMap.put(roomId, ticTacToeGameRS);
         }
         messagingTemplate.convertAndSend("/topic/public/" + roomId, ticTacToeGameRS);
