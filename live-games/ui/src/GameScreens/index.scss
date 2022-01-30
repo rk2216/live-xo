@@ -6,8 +6,30 @@
     display: grid;
     height: 100%;
     grid-template-rows: 100px;
-    grid-template-columns: 0.75fr 4fr 0.75fr;
+    grid-template-columns: 0.5fr 4fr 0.75fr;
     margin: 0 10rem;
+    .MuiBox-root {
+      .MuiListItem-root {
+        .listItem {
+          display: grid;
+          grid-template-columns: 1fr 2fr 1fr;
+          width: 100%;
+          .rank {
+            padding: 0.5rem 0 0 0.5rem;
+            font-weight: 600;
+          }
+          .info {
+            text-align: center;
+            .playerName {
+              font-weight: 600;
+            }
+          }
+        }
+      }
+      .MuiListItem-root:nth-child(even) {
+        background-color: #eee;
+      }
+    }
   }
 }
 

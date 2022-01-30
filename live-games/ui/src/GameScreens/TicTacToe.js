@@ -53,19 +53,18 @@ const TicTacToe = (props) => {
         </section>
         <section className="container">
             {tiles.map((tile, index) => {
-                    return <div className={classNames('tile', {
-                        'xTile': tile === 'X',
-                        'oTile': tile === 'O',
-                        'empty': tile === null
-                    })} onClick={() => (!tile && playerPosition === currentTurn && !winner) ?
-                        onClickHandler(index) : NO_OP()}>{tile}</div>;
-                }
+                return <div key={`tile${index}`} className={classNames('tile', {
+                    'xTile': tile === 'X',
+                    'oTile': tile === 'O',
+                    'empty': tile === null
+                })} onClick={() => (!tile && playerPosition === currentTurn && !winner) ?
+                    onClickHandler(index) : NO_OP()}>{tile}</div>;
+            }
             )}
         </section>
         <section
             className="display announcer">{(winner === "T") ? "Draw!" :
             ((winner === "X" || winner === "O") ? ("Winner is " + winner) : "")}</section>
-        }
         {userName === roomHost && <section className="controls">
             <button id="reset" onClick={onResetHandler} hidden={isResetButtonHidden}>Reset</button>
         </section>}
